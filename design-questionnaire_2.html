@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design → React Component Questionnaire</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1D9E75;
+    --green-light: #E1F5EE;
+    --green-mid: #9FE1CB;
+    --green-dark: #0F6E56;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666;
+    --text-muted: #999;
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: rgba(0,0,0,0.1);
+    --border-strong: rgba(0,0,0,0.18);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --font: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.5s ease both;
+  }
+  .header-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--green-dark);
+    background: var(--green-light);
+    border: 1px solid var(--green-mid);
+    border-radius: 99px;
+    padding: 4px 12px;
+    margin-bottom: 1rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .header-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+  }
+  .header h1 {
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+  .header h1 span { color: var(--green); }
+  .header p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Progress */
+  .progress-wrap {
+    width: 100%;
+    max-width: 680px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.5s 0.05s ease both;
+  }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+  }
+  .progress-track {
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* Steps nav */
+  .steps-nav {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    animation: fadeUp 0.5s 0.1s ease both;
+    scrollbar-width: none;
+  }
+  .steps-nav::-webkit-scrollbar { display: none; }
+  .step-pill {
+    flex-shrink: 0;
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .step-pill.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .step-pill.done {
+    background: var(--green-light);
+    border-color: var(--green-mid);
+    color: var(--green-dark);
+  }
+
+  /* Card */
+  .card {
+    width: 100%;
+    max-width: 680px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    animation: fadeUp 0.35s ease both;
+  }
+
+  .section-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Questions */
+  .q-block { margin-bottom: 1.5rem; }
+  .q-block:last-child { margin-bottom: 0; }
+  .q-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .q-hint {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    line-height: 1.55;
+  }
+  .q-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    font-family: var(--font-mono);
+  }
+
+  /* Chips */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 7px 14px;
+    border-radius: 99px;
+    border: 1px solid var(--border-strong);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    background: #fafaf8;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    user-select: none;
+    line-height: 1;
+  }
+  .chip:hover { border-color: var(--green); color: var(--green-dark); background: var(--green-light); }
+  .chip.selected { background: var(--green-light); border-color: var(--green); color: var(--green-dark); }
+
+  /* Textarea */
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    font-size: 14px;
+    font-family: var(--font);
+    padding: 12px 14px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: #fafaf8;
+    color: var(--text-primary);
+    resize: vertical;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  textarea::placeholder { color: var(--text-muted); }
+  textarea:focus { border-color: var(--green); background: #fff; }
+
+  /* Nav buttons */
+  .nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    gap: 12px;
+  }
+  .btn {
+    padding: 10px 22px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-primary);
+    transition: all 0.15s;
+  }
+  .btn:hover { background: #f0f0ec; }
+  .btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--green-dark); border-color: var(--green-dark); }
+
+  /* Summary */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 520px) { .summary-grid { grid-template-columns: 1fr; } }
+  .summary-card {
+    background: #fafaf8;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+  }
+  .summary-section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .summary-item {
+    font-size: 13px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    display: flex;
+    gap: 8px;
+    line-height: 1.4;
+  }
+  .summary-arrow { color: var(--green); flex-shrink: 0; font-weight: 600; }
+
+  .export-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    background: var(--green);
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: background 0.15s;
+    letter-spacing: 0.01em;
+  }
+  .export-btn:hover { background: var(--green-dark); }
+
+  .copy-success {
+    text-align: center;
+    font-size: 13px;
+    color: var(--green-dark);
+    margin-top: 10px;
+    font-family: var(--font-mono);
+    min-height: 20px;
+  }
+
+  /* Completion badge */
+  .completion-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--green-light);
+    border: 1px solid var(--green-mid);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    margin-bottom: 1.5rem;
+  }
+  .completion-icon {
+    width: 32px; height: 32px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 16px;
+    color: #fff;
+  }
+  .completion-text { font-size: 14px; color: var(--green-dark); font-weight: 500; }
+  .completion-sub { font-size: 12px; color: var(--green-dark); opacity: 0.75; margin-top: 2px; }
+
+  /* Footer */
+  .footer {
+    width: 100%;
+    max-width: 680px;
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Design System</div>
+  <h1>Design → <span>React</span> Component<br>Requirements Questionnaire</h1>
+  <p>Fill this in together with your designer to capture everything the development team needs to build your Figma components correctly the first time.</p>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-meta">
+    <span id="progress-label">Step 1 of 6</span>
+    <span id="progress-pct">0%</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="steps-nav" id="steps-nav"></div>
+
+<div class="card" id="main-card"></div>
+
+<div class="footer">Design System Team</div>
+
+<script>
+const SECTIONS = [
+  {
+    id: "component_basics",
+    label: "Overview",
+    title: "Component overview",
+    desc: "Let's start with the big picture — what are we building and how will it be used?",
+    questions: [
+      {
+        id: "component_name", type: "text",
+        label: "What is this component called in your designs?",
+        hint: "Use the exact name from your Figma file so we can find it easily.",
+        placeholder: "e.g. Primary Button, Data Card, Navigation Bar..."
+      },
+      {
+        id: "purpose", type: "text",
+        label: "What is the main job of this component?",
+        hint: "In plain language — what does a user do with it, or see from it?",
+        placeholder: "e.g. It lets users submit a form. It displays a product's price and image..."
+      },
+      {
+        id: "where_used", type: "chips", multi: true,
+        label: "Where does this component appear in the product?",
+        hint: "Think of all the screens or pages where you've placed this component.",
+        options: ["Homepage","Dashboard","Forms","Modals / popups","Navigation","Tables / lists","Detail pages","Onboarding","Everywhere"]
+      }
+    ]
+  },
+  {
+    id: "visual_states",
+    label: "States",
+    title: "Visual states & variations",
+    desc: "Components often look different depending on what's happening. We need to capture every version.",
+    questions: [
+      {
+        id: "variants", type: "chips", multi: true,
+        label: "Does this component come in different visual styles or sizes?",
+        hint: "For example, a button might have 'Primary', 'Secondary', and 'Ghost' styles, or 'Small', 'Medium', 'Large' sizes.",
+        options: ["Different colours / styles","Different sizes","With or without icon","With or without label","Outlined vs filled","Only one version"]
+      },
+      {
+        id: "states", type: "chips", multi: true,
+        label: "How does the component change when a user interacts with it?",
+        hint: "Think about what it looks like when you hover over it, click it, or when it's not available to use.",
+        options: ["Hover (mouse over)","Active (being clicked)","Focused (keyboard selected)","Disabled (can't be used)","Loading / busy","Success","Error / warning","Empty / no data","Selected / checked"]
+      },
+      {
+        id: "responsive", type: "chips", multi: false,
+        label: "Does the design change on smaller screens like phones or tablets?",
+        hint: "Does anything move, shrink, hide, or stack differently on a phone vs a desktop?",
+        options: ["Yes — it changes on mobile","Yes — it changes on tablet too","No — it looks the same on all screens","Not sure"]
+      }
+    ]
+  },
+  {
+    id: "content_behaviour",
+    label: "Content",
+    title: "Content & behaviour",
+    desc: "What goes inside the component, and what happens when users interact with it?",
+    questions: [
+      {
+        id: "content_types", type: "chips", multi: true,
+        label: "What types of content can appear inside this component?",
+        hint: "Check everything that could go inside it.",
+        options: ["Text / labels","Numbers or data","Images or avatars","Icons","Buttons or links","Input fields","Badges or tags","Progress indicators","Other components"]
+      },
+      {
+        id: "dynamic_content", type: "chips", multi: false,
+        label: "Can the content inside change or update automatically?",
+        hint: "For example, does it show live data like a count or status that refreshes on its own?",
+        options: ["Yes — it updates in real time","Yes — it updates when the user does something","No — the content is static","Not sure"]
+      },
+      {
+        id: "long_content", type: "chips", multi: false,
+        label: "What should happen if there is too much text or content to fit?",
+        hint: "Imagine someone types a very long name or description — what should the component do?",
+        options: ["Cut it off with '...' (truncate)","Wrap onto the next line","The component grows taller","Scroll inside the component","Not sure — designer's call"]
+      },
+      {
+        id: "actions", type: "text",
+        label: "What actions can a user take on this component?",
+        hint: "What happens when they click, tap, swipe, or interact with it?",
+        placeholder: "e.g. Click opens a dropdown, tap selects the item, swipe dismisses it..."
+      }
+    ]
+  },
+  {
+    id: "accessibility",
+    label: "Accessibility",
+    title: "Accessibility & feedback",
+    desc: "We want every user to be able to use this component, including people using keyboards or screen readers.",
+    questions: [
+      {
+        id: "keyboard", type: "chips", multi: false,
+        label: "Should this component be usable with just a keyboard (no mouse)?",
+        hint: "Some users navigate entirely with the Tab key and arrow keys instead of a mouse.",
+        options: ["Yes — keyboard must work","No — mouse / touch only is fine","Not sure — what do you recommend?"]
+      },
+      {
+        id: "feedback_type", type: "chips", multi: true,
+        label: "How should the component give feedback to the user?",
+        hint: "When something happens (like an error or success), how does the user know?",
+        options: ["Show a message on screen","Change colour or icon","Play a sound","Vibrate (mobile)","Show a toast / notification","No feedback needed"]
+      },
+      {
+        id: "error_empty", type: "chips", multi: false,
+        label: "Has the design shown what happens when there is no data or an error occurs?",
+        hint: "For example, an empty list, a failed load, or a form with mistakes — are those screens in Figma?",
+        options: ["Yes — all states are in Figma","Only some states are designed","No — developers should decide","This component can't error"]
+      }
+    ]
+  },
+  {
+    id: "tokens",
+    label: "Styling",
+    title: "Styling & design tokens",
+    desc: "This helps us link the design to code so colours, fonts, and spacing stay consistent automatically.",
+    questions: [
+      {
+        id: "uses_tokens", type: "chips", multi: false,
+        label: "Are the colours and fonts using your design system's shared styles?",
+        hint: "In Figma, these are called 'Styles' or 'Variables' — named colours like 'Brand/Primary' instead of a plain hex code.",
+        options: ["Yes — everything uses shared styles","Mostly — some things are custom","No — colours were picked manually","Not sure"]
+      },
+      {
+        id: "theming", type: "chips", multi: true,
+        label: "Does your product need a dark mode or different brand themes?",
+        hint: "For example, does the app have a light and dark version, or look different for different clients?",
+        options: ["Dark mode needed","Multiple brand themes","High contrast / accessibility mode","No — one theme only"]
+      },
+      {
+        id: "animations", type: "text",
+        label: "Are there any animations or transitions in the design?",
+        hint: "For example, does a menu slide in, does a button pulse, or does content fade in when it loads?",
+        placeholder: "Describe any motion in the design, or type 'None' if it's all static..."
+      }
+    ]
+  },
+  {
+    id: "edge_cases",
+    label: "Edge cases",
+    title: "Edge cases & testing",
+    desc: "These questions help make sure the component is tested properly before it goes live.",
+    questions: [
+      {
+        id: "must_not_break", type: "text",
+        label: "What is the most important thing this component must never get wrong?",
+        hint: "Think of the worst thing that could happen if it broke — what would cause a real problem for users?",
+        placeholder: "e.g. It must never submit without all fields filled in. The price must always be visible..."
+      },
+      {
+        id: "linked_components", type: "text",
+        label: "Does this component depend on or affect any other components?",
+        hint: "For example, does clicking this open a modal? Does this component live inside another component?",
+        placeholder: "e.g. Clicking opens the 'Product Detail Modal'. This is always inside the 'Card Grid'..."
+      },
+      {
+        id: "extra_notes", type: "text",
+        label: "Anything else the development team should know?",
+        hint: "Any special behaviour, known design decisions, or things that were debated — share it here.",
+        placeholder: "Any extra context, exceptions, or notes for the developers..."
+      }
+    ]
+  }
+];
+
+let current = 0;
+const answers = {};
+
+function getChips(id) { return answers[id] || []; }
+function toggleChip(id, val, multi) {
+  const cur = answers[id] || [];
+  answers[id] = multi
+    ? (cur.includes(val) ? cur.filter(v => v !== val) : [...cur, val])
+    : (cur[0] === val ? [] : [val]);
+  render();
+}
+function setText(id, val) { answers[id] = val; }
+
+function renderSection() {
+  const sec = SECTIONS[current];
+  return `
+    <div class="section-eyebrow">Step ${current + 1} of ${SECTIONS.length} &mdash; ${sec.label}</div>
+    <div class="section-title">${sec.title}</div>
+    <div class="section-desc">${sec.desc}</div>
+    ${sec.questions.map(renderQ).join('')}
+    <div class="nav">
+      <button class="btn" onclick="go(-1)" ${current === 0 ? 'disabled' : ''}>&larr; Back</button>
+      <button class="btn btn-primary" onclick="go(1)">
+        ${current === SECTIONS.length - 1 ? 'View summary &rarr;' : 'Next &rarr;'}
+      </button>
+    </div>
+  `;
+}
+
+function handleChipClick(e) {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  const group = e.currentTarget;
+  const qid = group.dataset.qid;
+  const multi = group.dataset.multi === 'true';
+  const val = chip.dataset.val;
+  toggleChip(qid, val, multi);
+}
+
+function renderQ(q) {
+  if (q.type === 'chips') {
+    const sel = getChips(q.id);
+    return `
+      <div class="q-block">
+        <div class="q-label">${q.label}</div>
+        <div class="q-hint">${q.hint}</div>
+        <div class="chip-group" data-qid="${q.id}" data-multi="${q.multi}" onclick="handleChipClick(event)">
+          ${q.options.map(opt => `
+            <div class="chip ${sel.includes(opt) ? 'selected' : ''}" data-val="${opt.replace(/"/g, '&quot;')}">
+              ${opt}
+            </div>`).join('')}
+        </div>
+        ${!q.multi ? `<div class="q-meta">Select one</div>` : `<div class="q-meta">Select all that apply</div>`}
+      </div>`;
+  }
+  return `
+    <div class="q-block">
+      <div class="q-label">${q.label}</div>
+      <div class="q-hint">${q.hint}</div>
+      <textarea
+        id="ta_${q.id}"
+        placeholder="${q.placeholder}"
+        oninput="setText('${q.id}', this.value)"
+      ></textarea>
+    </div>`;
+}
+
+function renderSummary() {
+  const cards = SECTIONS.map(sec => {
+    const items = sec.questions.map(q => {
+      const ans = answers[q.id];
+      if (!ans || (Array.isArray(ans) && !ans.length) || ans === '') return '';
+      const display = Array.isArray(ans) ? ans.join(', ') : ans;
+      return `<div class="summary-item"><span class="summary-arrow">&#8594;</span><span>${display}</span></div>`;
+    }).filter(Boolean).join('');
+    if (!items) return '';
+    return `<div class="summary-card">
+      <div class="summary-section-label">${sec.title}</div>
+      ${items}
+    </div>`;
+  }).filter(Boolean).join('');
+
+  return `
+    <div class="completion-badge">
+      <div class="completion-icon">&#10003;</div>
+      <div>
+        <div class="completion-text">Questionnaire complete</div>
+        <div class="completion-sub">Copy the brief below and share with your development team</div>
+      </div>
+    </div>
+    <div class="summary-grid">${cards || '<p style="color:var(--text-muted);font-size:14px;">No answers recorded yet.</p>'}</div>
+    <button class="export-btn" onclick="copyBrief()">Copy requirements brief to clipboard</button>
+    <div class="copy-success" id="copy-msg"></div>
+    <div class="nav">
+      <button class="btn" onclick="go(-1)">&larr; Back</button>
+      <button class="btn" onclick="restart()">Start new component</button>
+    </div>
+  `;
+}
+
+function buildBrief() {
+  const divider = '='.repeat(52);
+  const thin    = '-'.repeat(52);
+  let out = '';
+  out += divider + '\n';
+  out += '  COMPONENT REQUIREMENTS BRIEF\n';
+  out += '  Design System Team\n';
+  out += divider + '\n\n';
+  SECTIONS.forEach(sec => {
+    out += `  [ ${sec.title.toUpperCase()} ]\n`;
+    out += '  ' + thin + '\n';
+    sec.questions.forEach(q => {
+      const ans = answers[q.id];
+      if (!ans || (Array.isArray(ans) && !ans.length) || ans === '') return;
+      const display = Array.isArray(ans) ? ans.join(' | ') : ans;
+      const label = q.label.length > 48 ? q.label.slice(0, 45) + '...' : q.label;
+      out += `\n  Q: ${label}\n`;
+      if (Array.isArray(answers[q.id])) {
+        answers[q.id].forEach(v => { out += `     - ${v}\n`; });
+      } else {
+        out += `     ${display}\n`;
+      }
+    });
+    out += '\n';
+  });
+  out += divider + '\n';
+  return out;
+}
+
+function copyBrief() {
+  const text = buildBrief();
+  const msgEl = document.getElementById('copy-msg');
+
+  function showModal(content) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:1rem;';
+    overlay.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:1.5rem;width:100%;max-width:600px;max-height:80vh;display:flex;flex-direction:column;gap:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span style="font-weight:600;font-size:15px;font-family:'DM Sans',sans-serif;">Requirements Brief</span>
+          <button id="modal-close-x" style="border:none;background:none;font-size:22px;cursor:pointer;color:#999;line-height:1;padding:2px 6px;border-radius:4px;" title="Close">&times;</button>
+        </div>
+        <textarea readonly style="flex:1;min-height:340px;font-family:'DM Mono',monospace;font-size:12px;line-height:1.7;padding:1rem;border:1px solid rgba(0,0,0,0.12);border-radius:8px;background:#f8f8f6;resize:none;white-space:pre;"></textarea>
+        <div style="display:flex;gap:10px;">
+          <button id="modal-copy-btn" style="flex:1;padding:10px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;">Select all &amp; copy</button>
+          <button id="modal-close-btn" style="padding:10px 20px;background:#fff;color:#444;border:1px solid rgba(0,0,0,0.15);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;">Close</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const ta = overlay.querySelector('textarea');
+    ta.value = content;
+    const closeModal = () => overlay.remove();
+    overlay.querySelector('#modal-close-x').addEventListener('click', closeModal);
+    overlay.querySelector('#modal-close-btn').addEventListener('click', closeModal);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+    overlay.querySelector('#modal-copy-btn').addEventListener('click', function() {
+      ta.select();
+      try {
+        document.execCommand('copy');
+        this.textContent = 'Copied!';
+        setTimeout(() => { this.textContent = 'Select all & copy'; }, 2000);
+      } catch(e) {}
+    });
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      msgEl.textContent = 'Copied to clipboard!';
+      setTimeout(() => { if (msgEl) msgEl.textContent = ''; }, 3000);
+    }).catch(() => {
+      showModal(text);
+    });
+  } else {
+    showModal(text);
+  }
+}
+
+function restart() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  current = 0;
+  render();
+}
+
+function go(dir) {
+  current = Math.min(SECTIONS.length, Math.max(0, current + dir));
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderNav() {
+  const nav = document.getElementById('steps-nav');
+  nav.innerHTML = SECTIONS.map((s, i) => {
+    const cls = i < current ? 'done' : i === current ? 'active' : '';
+    return `<div class="step-pill ${cls}" onclick="jumpTo(${i})">${s.label}</div>`;
+  }).join('') + (current >= SECTIONS.length ? `<div class="step-pill active">Summary</div>` : '');
+}
+
+function jumpTo(i) {
+  if (i <= current) { current = i; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function renderProgress() {
+  const total = SECTIONS.length;
+  const pct = current >= total ? 100 : Math.round((current / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+  document.getElementById('progress-label').textContent =
+    current >= total ? 'Complete' : `Step ${current + 1} of ${total}`;
+}
+
+function render() {
+  renderProgress();
+  renderNav();
+  const card = document.getElementById('main-card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'fadeUp 0.3s ease both';
+  card.innerHTML = current >= SECTIONS.length ? renderSummary() : renderSection();
+  // Restore textarea values
+  SECTIONS.forEach(sec => sec.questions.forEach(q => {
+    if (q.type === 'text') {
+      const el = document.getElementById('ta_' + q.id);
+      if (el) el.value = answers[q.id] || '';
+    }
+  }));
+}
+
+render();
+</script>
+</body>
+</html>
