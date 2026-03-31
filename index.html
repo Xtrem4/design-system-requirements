@@ -677,7 +677,7 @@ function buildBrief() {
       const ans = answers[q.id];
       if (!ans || (Array.isArray(ans) && !ans.length) || ans === '') return;
       const display = Array.isArray(ans) ? ans.join(' | ') : ans;
-      const label = q.label.length > 48 ? q.label.slice(0, 45) + '...' : q.label;
+      const label = q.label;
       out += `\n  Q: ${label}\n`;
       if (Array.isArray(answers[q.id])) {
         answers[q.id].forEach(v => { out += `     - ${v}\n`; });
