@@ -443,10 +443,9 @@ const SECTIONS = [
         options: ["Hover (mouse over)","Active (being clicked)","Focused (keyboard selected)","Disabled (can't be used)","Loading / busy","Success","Error / warning","Empty / no data","Selected / checked"]
       },
       {
-        id: "responsive", type: "chips", multi: false,
-        label: "Does the design change on smaller screens like phones or tablets?",
-        hint: "Does anything move, shrink, hide, or stack differently on a phone vs a desktop?",
-        options: ["Yes — it changes on mobile","Yes — it changes on tablet too","No — it looks the same on all screens","Not sure"]
+        id: "responsive", type: "textarea",
+        label: "How does the component behave on different screen sizes (phone, tablet, desktop)?",
+        hint: "Describe what changes on smaller screens — does anything move, shrink, hide, stack, or reflow differently?"
       }
     ]
   },
